@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="DocumentReaderSample.SummaryPage"
+             Title="Document Summary">
+    <ScrollView>
+        <VerticalStackLayout Spacing="20" Padding="20">
+            <Label Text="Document Scan Results" FontSize="24" FontAttributes="Bold" HorizontalOptions="Center" />
+
+            <Frame BorderColor="LightGray" CornerRadius="10" Padding="15">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Document Type:" FontAttributes="Bold" />
+                    <Label x:Name="DocumentTypeLabel" Text="Not detected" />
+
+                    <Label Text="Name:" FontAttributes="Bold" />
+                    <Label x:Name="NameLabel" Text="Not detected" />
+
+                    <Label Text="Document Number:" FontAttributes="Bold" />
+                    <Label x:Name="DocumentNumberLabel" Text="Not detected" />
+
+                    <Label Text="Date of Birth:" FontAttributes="Bold" />
+                    <Label x:Name="DateOfBirthLabel" Text="Not detected" />
+
+                    <Label Text="Date of Expiry:" FontAttributes="Bold" />
+                    <Label x:Name="DateOfExpiryLabel" Text="Not detected" />
+
+                    <Label Text="Issuing Country:" FontAttributes="Bold" />
+                    <Label x:Name="IssuingCountryLabel" Text="Not detected" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <Frame BorderColor="LightGray" CornerRadius="10" Padding="15">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Portrait Image" FontAttributes="Bold" HorizontalOptions="Center" />
+                    <Image x:Name="PortraitImage" Source="mainpage_portrait_icon.png" WidthRequest="150" HeightRequest="200" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <Frame BorderColor="LightGray" CornerRadius="10" Padding="15">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Document Image" FontAttributes="Bold" HorizontalOptions="Center" />
+                    <Image x:Name="DocumentImage" Source="mainpage_id_icon.png" WidthRequest="250" HeightRequest="150" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </Frame>
+
+            <Button Text="Scan Another Document" Clicked="OnScanAnotherClicked" BackgroundColor="Blue" TextColor="White" Margin="0,20,0,0" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

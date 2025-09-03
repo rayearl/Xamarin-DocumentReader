@@ -12,6 +12,10 @@
         string SurnameAndGivenNames { get; set; }
         byte[] PortraitField { get; set; }
         byte[] DocumentField { get; set; }
+        string DocumentType { get; set; }
+        string DocumentNumber { get; set; }
+        string DateOfBirth { get; set; }
+        string DateOfExpiry { get; set; }
+        string IssuingCountry { get; set; }
     }
 }
-

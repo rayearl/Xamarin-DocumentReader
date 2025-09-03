@@ -14,12 +14,17 @@ namespace DocumentReaderSample.Platforms.Android
         public string SurnameAndGivenNames { get; set; }
         public byte[] PortraitField { get; set; }
         public byte[] DocumentField { get; set; }
+        public string DocumentType { get; set; }
+        public string DocumentNumber { get; set; }
+        public string DateOfBirth { get; set; }
+        public string DateOfExpiry { get; set; }
+        public string IssuingCountry { get; set; }
     }
     public class DocReaderScanner : Java.Lang.Object, IDocReaderScanner, IDocumentReaderCompletion
     {
         public event EventHandler<IDocReaderScannerEvent> ResultsObtained;
         private bool IsReadRfid = false;
-        private string selectedScenario = "Mrz";
+        private string selectedScenario = "Ocr";
         public void ShowScanner(bool IsReadRfid)
         {
             ScannerConfig config = new ScannerConfig.Builder(selectedScenario).Build();
@@ -43,7 +48,12 @@ namespace DocumentReaderSample.Platforms.Android
             {
                 SurnameAndGivenNames = results.GetTextFieldValueByType(EVisualFieldType.FtSurnameAndGivenNames),
                 PortraitField = ConvertBitmap(portrait),
-                DocumentField = ConvertBitmap(results.GetGraphicFieldImageByType(EGraphicFieldType.GfDocumentImage))
+                DocumentField = ConvertBitmap(results.GetGraphicFieldImageByType(EGraphicFieldType.GfDocumentImage)),
+                DocumentType = results.GetTextFieldValueByType(EVisualFieldType.FtDocumentClassCode) ?? results.GetTextFieldValueByType(EVisualFieldType.FtDocumentClassName) ?? "Unknown",
+                DocumentNumber = results.GetTextFieldValueByType(EVisualFieldType.FtDocumentNumber) ?? "Not found",
+                DateOfBirth = results.GetTextFieldValueByType(EVisualFieldType.FtDateOfBirth) ?? "Not found",
+                DateOfExpiry = results.GetTextFieldValueByType(EVisualFieldType.FtDateOfExpiry) ?? "Not found",
+                IssuingCountry = results.GetTextFieldValueByType(EVisualFieldType.FtIssuingStateCode) ?? results.GetTextFieldValueByType(EVisualFieldType.FtIssuingStateName) ?? "Not found"
             });
         }
         public void SelectScenario(string scenarioName) { selectedScenario = scenarioName; }

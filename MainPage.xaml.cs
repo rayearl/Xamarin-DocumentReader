@@ -2,87 +2,63 @@
 
 public partial class MainPage : ContentPage
 {
-    static readonly bool btDeviceSample = false;
     readonly IDocReaderScanner docReaderScanner;
-    static List<string> Scenarios = [];
+
     public MainPage()
     {
         InitializeComponent();
         Application.Current.UserAppTheme = AppTheme.Light;
         Application.Current.RequestedThemeChanged += (s, a) => { Application.Current.UserAppTheme = AppTheme.Light; };
 
-        // Fix disappearing selection in iOS
-        Loaded += (object sender, EventArgs e) =>
-        {
-            if (Scenarios.Count > 0)
-                ScenariosListView.UpdateSelectedItems([ScenariosListView.SelectedItem]);
-        };
+        // Disable scan button until initialization is complete
+        ScanDocumentButton.IsEnabled = false;
 
         docReaderScanner = DependencyService.Get<IDocReaderScanner>();
-        docReaderScanner.ResultsObtained += (object s, IDocReaderScannerEvent e) =>
-        {
-            NamesLabels.Text = e.SurnameAndGivenNames;
-            if (e.PortraitField != null)
-                PortraitImage.Source = ImageSource.FromStream(() => { return new MemoryStream(e.PortraitField); });
-            if (e.DocumentField != null)
-                DocumentImage.Source = ImageSource.FromStream(() => { return new MemoryStream(e.DocumentField); });
-        };
+        docReaderScanner.ResultsObtained += OnScanResultsObtained;
 
-        if (btDeviceSample)
-        {
-            NamesLabels.Text = "Connect btDevice.";
-            StartServiceButton.IsVisible = true;
-            BTDeviceName.IsVisible = true;
-            RecognizeButton.IsVisible = false;
-            return;
-        }
-
+        // Initialize the document reader
         IDocReaderInit docReaderInit = DependencyService.Get<IDocReaderInit>();
         docReaderInit.ScenariosObtained += (object sender, IDocReaderInitEvent e) =>
         {
             if (e.IsSuccess)
             {
-                foreach (Scenario scenario in e.Scenarios) { Scenarios.Add(scenario.Name); }
-                ScenariosListView.ItemsSource = Scenarios;
-                ScenariosListView.SelectedItem = Scenarios[0];
-                ScenariosListView.SelectionChanged += (object sender, SelectionChangedEventArgs e) =>
-                {
-                    string scenario = e.CurrentSelection.FirstOrDefault() as string;
-                    docReaderScanner.SelectScenario(scenario);
-                };
-                RfidLayout.IsVisible = e.IsRfidAvailable;
-                NamesLabels.Text = "Ready";
+                StatusLabel.Text = "Ready to scan";
+                ScanDocumentButton.IsEnabled = true;
             }
-            else NamesLabels.Text = "Init failed";
+            else
+            {
+                StatusLabel.Text = "Initialization failed";
+                ScanDocumentButton.IsEnabled = false;
+            }
         };
-        NamesLabels.Text = "Initializing...";
+        StatusLabel.Text = "Initializing...";
         docReaderInit.InitDocReader();
     }
-    void ShowScanner_Clicked(object sender, EventArgs evt)
+
+    protected override void OnAppearing()
     {
-        ClearResults();
-        docReaderScanner.ShowScanner(ReadRfidCb.IsChecked);
-    }
-    async void RecognizeImage_Clicked(object sender, EventArgs evt)
-    {
-        ClearResults();
-        Stream stream = await DependencyService.Get<IPhotoPickerService>().GetImageStreamAsync();
-        if (stream != null)
+        base.OnAppearing();
+        // Reset status when returning to this page
+        if (ScanDocumentButton.IsEnabled)
         {
-            NamesLabels.Text = "Recognize image...";
-            docReaderScanner.RecognizeImage(stream, ReadRfidCb.IsChecked);
+            StatusLabel.Text = "Ready to scan";
         }
-        (sender as Button).IsEnabled = true;
     }
-    void ClearResults()
+
+    private async void ScanDocument_Clicked(object sender, EventArgs e)
     {
-        NamesLabels.Text = "";
-        PortraitImage.Source = "mainpage_portrait_icon.png";
-        DocumentImage.Source = "mainpage_id_icon.png";
+        StatusLabel.Text = "Opening scanner...";
+        ScanDocumentButton.IsEnabled = false;
+        docReaderScanner.ShowScanner(false); // Disable RFID for simplicity
     }
-    void StartService_Clicked(object sender, EventArgs evt)
+
+    private async void OnScanResultsObtained(object sender, IDocReaderScannerEvent e)
     {
-        IDocReaderInit docReaderInit = DependencyService.Get<IDocReaderInit>();
-        docReaderInit.CheckPermissionsAndConnect(BTDeviceName.Text);
+        // Re-enable button in case scan was cancelled or failed
+        ScanDocumentButton.IsEnabled = true;
+        StatusLabel.Text = "Ready to scan";
+
+        // Navigate to summary page with results
+        await Navigation.PushAsync(new SummaryPage(e));
     }
 }

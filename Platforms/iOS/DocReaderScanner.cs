@@ -10,12 +10,17 @@ namespace DocumentReaderSample.Platforms.iOS
         public string SurnameAndGivenNames { get; set; }
         public byte[] PortraitField { get; set; }
         public byte[] DocumentField { get; set; }
+        public string DocumentType { get; set; }
+        public string DocumentNumber { get; set; }
+        public string DateOfBirth { get; set; }
+        public string DateOfExpiry { get; set; }
+        public string IssuingCountry { get; set; }
     }
     public class DocReaderScanner : IDocReaderScanner
     {
         public event EventHandler<IDocReaderScannerEvent> ResultsObtained;
         private bool IsReadRfid = false;
-        private string selectedScenario = "Mrz";
+        private string selectedScenario = "Ocr";
         public void ShowScanner(bool IsReadRfid)
         {
             this.IsReadRfid = IsReadRfid;
@@ -47,7 +52,12 @@ namespace DocumentReaderSample.Platforms.iOS
             {
                 SurnameAndGivenNames = result.GetTextFieldValueByType(RGLFieldType.Surname_And_Given_Names),
                 PortraitField = ConvertImage(portrait),
-                DocumentField = ConvertImage(result.GetGraphicFieldImageByType(RGLGraphicFieldType.DocumentImage))
+                DocumentField = ConvertImage(result.GetGraphicFieldImageByType(RGLGraphicFieldType.DocumentImage)),
+                DocumentType = result.GetTextFieldValueByType(RGLFieldType.Document_Class_Code) ?? "Unknown",
+                DocumentNumber = result.GetTextFieldValueByType(RGLFieldType.Document_Number) ?? "Not found",
+                DateOfBirth = "Not available", // Date fields may not be accessible in this iOS binding
+                DateOfExpiry = "Not available", // Date fields may not be accessible in this iOS binding
+                IssuingCountry = "Not available" // Country field may not be accessible in this iOS binding
             });
         }
         protected static byte[] ConvertImage(UIImage image)
